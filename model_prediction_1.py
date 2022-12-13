@@ -44,36 +44,35 @@ data_ =[]
 interrupted = False
 reset = False
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
-
+target_points = np.array([[-0.314,1.661,0.45],[0,1.661,0.45],[0.314,1.661,0.45],[-0.314,1.347,0.45],[0,1.347,0.45],[0.314,1.347,0.45],[-0.314,1.033,0.45],[0,1.033,0.45],[0.314,1.033,0.45]])
+r= 0.9
+temp = []
+for i in range(9): 
+    temp.append(np.array([target_points[i][0]*r,(target_points[i][1]-target_points[4][1])*r+target_points[4][1], target_points[i][2]]))
+target_points = temp
 def model(ip_data):
-    pre_target = []
-    t_interval = 1
-    prob = []
-    p = 1
-    train_length = len(x_train)
-    for j in range(0,train_length):
-        hand_position = np.asarray(x_train[j])
-        si = hand_position.shape[0]
-        for k in range(p,si):
-            f = 0
-            total_f = 0
-            P = np.zeros([9])
-            current_hand_position = hand_position[k]
-            previous_hand_position = hand_position[k-p]          
-            for i in range(0,9):
-                g = (np.linalg.norm(target_points[i] - np.asarray(current_hand_position)) - np.linalg.norm(np.asarray(target_points[i]) - np.asarray(previous_hand_position)))/t_interval
-                if g<0:
-                    f = -g
-                else:
-                    f = 0
-            
-        P[i] = f
-        target = np.argmax(P)
-        
-    pre_target.append(target)
-    prob.append(P)
 
-    return pre_target,prob
+    t_interval = 1
+    p = 2
+    hand_position = np.asarray(ip_data)
+    si = len(hand_position)
+    if si <= 2:
+        return -1
+    else:
+        f = 0
+        P = np.zeros([9])
+        current_hand_position = hand_position[-1]
+        previous_hand_position = hand_position[-p]          
+        for i in range(0,9):
+            g = (np.linalg.norm(np.asarray(target_points[i]) - np.asarray(current_hand_position)) - np.linalg.norm(np.asarray(target_points[i]) - np.asarray(previous_hand_position)))/t_interval
+            if g<0:
+                f = -g
+            else:
+                f = 0
+            P[i] = f
+        target = np.argmax(P)
+
+    return target
 
 def thread_1():
     global interrupted
@@ -87,9 +86,11 @@ def thread_1():
                 continue
             else:
                 old = data_[-1]
-                data_ip = tf.expand_dims(tf.transpose(tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences(np.array(data_).T, padding='post', dtype='float', maxlen=200))),axis =0)
-                pred = model(data_ip)
-                sock.SendData(str(pred))
+                data_ip = tf.expand_dims(tf.convert_to_tensor(np.array(data_)),axis =0)
+                pred = model(data_)
+                print(pred)
+                if pred != -1:
+                    sock.SendData(str(pred))
         if interrupted:
             break
 
