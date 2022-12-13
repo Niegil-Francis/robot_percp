@@ -44,6 +44,37 @@ data_ =[]
 interrupted = False
 reset = False
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
+
+def model(ip_data):
+    pre_target = []
+    t_interval = 1
+    prob = []
+    p = 1
+    train_length = len(x_train)
+    for j in range(0,train_length):
+        hand_position = np.asarray(x_train[j])
+        si = hand_position.shape[0]
+        for k in range(p,si):
+            f = 0
+            total_f = 0
+            P = np.zeros([9])
+            current_hand_position = hand_position[k]
+            previous_hand_position = hand_position[k-p]          
+            for i in range(0,9):
+                g = (np.linalg.norm(target_points[i] - np.asarray(current_hand_position)) - np.linalg.norm(np.asarray(target_points[i]) - np.asarray(previous_hand_position)))/t_interval
+                if g<0:
+                    f = -g
+                else:
+                    f = 0
+            
+        P[i] = f
+        target = np.argmax(P)
+        
+    pre_target.append(target)
+    prob.append(P)
+
+    return pre_target,prob
+
 def thread_1():
     global interrupted
     global data_
@@ -56,13 +87,9 @@ def thread_1():
                 continue
             else:
                 old = data_[-1]
-                ip_data = tf.expand_dims(tf.transpose(tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences(np.array(data_).T, padding='post', dtype='float', maxlen=200))),axis =0)
-                prediction = model_load.predict(ip_data,verbose = 0)
-                conf = prediction[0][len(data_)-1][np.argmax(prediction,axis=2)[0][-1]]
-                pred = np.argmax(prediction,axis=2)[0][-1]
-                if conf >= 0.85:
-                    print(pred)
-                    sock.SendData(str(pred))
+                data_ip = tf.expand_dims(tf.transpose(tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences(np.array(data_).T, padding='post', dtype='float', maxlen=200))),axis =0)
+                pred = model(data_ip)
+                sock.SendData(str(pred))
         if interrupted:
             break
 
