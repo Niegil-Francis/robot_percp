@@ -35,7 +35,7 @@ import time
 import signal
 # Testing the saved model
 # model_load = load_model('/content/drive/MyDrive/Robot perception /Modeling/models/lstm_data_trim.h5')
-model_load = load_model('./models/sep_1/lstm_rnn.h5')
+model_load = load_model('./models/sep_1/lstm.h5')
 # model_load = load_model('./models/rnn.h5')
 # model_load.evaluate(x_test,y_test)
 print(model_load.summary())
