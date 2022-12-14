@@ -24,6 +24,7 @@ from tensorflow.keras.models import load_model
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
+from tensorflow.keras.optimizers import Adam
 
 import sys    
 sys.path.insert(1, './imports')
@@ -35,7 +36,8 @@ import time
 import signal
 # Testing the saved model
 # model_load = load_model('/content/drive/MyDrive/Robot perception /Modeling/models/lstm_data_trim.h5')
-model_load = load_model('./models/sep_1/lstm.h5')
+model_load = load_model('./models/sep_0.7/lstm_rnn.h5',compile = False)
+model_load.compile(loss='categorical_crossentropy', metrics = ['accuracy'], optimizer=Adam(1e-2))
 # model_load = load_model('./models/rnn.h5')
 # model_load.evaluate(x_test,y_test)
 print(model_load.summary())
