@@ -33,47 +33,42 @@ import time
 import threading
 import time
 import signal
+
+from scipy.spatial.distance import euclidean
+
+from fastdtw import fastdtw
+import pickle
+
+
 # Testing the saved model
 # model_load = load_model('/content/drive/MyDrive/Robot perception /Modeling/models/lstm_data_trim.h5')
-# model_load = load_model('./models/sep_1/lstm_rnn.h5')
+# model_load = load_model('./models/sep_1/lstm.h5')
 # model_load = load_model('./models/rnn.h5')
 # model_load.evaluate(x_test,y_test)
 # print(model_load.summary())
+with open('./models/sep_1/data_driven', 'rb') as handle:
+    dic = pickle.load(handle)
+
+
+
+def model_dtw_pred(ip_data,dic):
+
+    
+    predi = []
+    d = []
+    for i in range(0,9):
+        distance, path = fastdtw(dic[i].T, ip_data, dist=euclidean)
+        d.append(distance)
+
+    predi.append(d.index(min(d)))
+    
+    return predi
+
 data_ =[]
 
 interrupted = False
 reset = False
 sock = U.UdpComms(udpIP="127.0.0.1", portTX=8000, portRX=8001, enableRX=True, suppressWarnings=True)
-target_points = np.array([[-0.314,1.661,0.45],[0,1.661,0.45],[0.314,1.661,0.45],[-0.314,1.347,0.45],[0,1.347,0.45],[0.314,1.347,0.45],[-0.314,1.033,0.45],[0,1.033,0.45],[0.314,1.033,0.45]])
-r= 0.9
-temp = []
-for i in range(9): 
-    temp.append(np.array([target_points[i][0]*r,(target_points[i][1]-target_points[4][1])*r+target_points[4][1], target_points[i][2]]))
-target_points = temp
-def model(ip_data):
-
-    t_interval = 1
-    p = 2
-    hand_position = np.asarray(ip_data)
-    si = len(hand_position)
-    if si <= 2:
-        return -1
-    else:
-        f = 0
-        P = np.zeros([9])
-        current_hand_position = hand_position[-1]
-        previous_hand_position = hand_position[-p]          
-        for i in range(0,9):
-            g = (np.linalg.norm(np.asarray(target_points[i]) - np.asarray(current_hand_position)) - np.linalg.norm(np.asarray(target_points[i]) - np.asarray(previous_hand_position)))/t_interval
-            if g<0:
-                f = -g
-            else:
-                f = 0
-            P[i] = f
-        target = np.argmax(P)
-
-    return target
-
 def thread_1():
     global interrupted
     global data_
@@ -86,11 +81,10 @@ def thread_1():
                 continue
             else:
                 old = data_[-1]
-                data_ip = tf.expand_dims(tf.convert_to_tensor(np.array(data_)),axis =0)
-                pred = model(data_)
-                print(pred)
-                if pred != -1:
+                if len(data_) > 2:
+                    pred = predi = model_dtw_pred(data_,dic)[0]
                     sock.SendData(str(pred))
+                    print(pred)
         if interrupted:
             break
 
