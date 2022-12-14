@@ -46,7 +46,7 @@ import pickle
 # model_load = load_model('./models/rnn.h5')
 # model_load.evaluate(x_test,y_test)
 # print(model_load.summary())
-with open('./models/sep_1/data_driven', 'rb') as handle:
+with open('./models/sep_0.7/data_driven', 'rb') as handle:
     dic = pickle.load(handle)
 
 
