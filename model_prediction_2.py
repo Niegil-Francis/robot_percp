@@ -24,7 +24,6 @@ from tensorflow.keras.models import load_model
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
-from tensorflow.keras.optimizers import Adam
 
 import sys    
 sys.path.insert(1, './imports')
@@ -34,13 +33,37 @@ import time
 import threading
 import time
 import signal
+
+from scipy.spatial.distance import euclidean
+
+from fastdtw import fastdtw
+import pickle
+
+
 # Testing the saved model
 # model_load = load_model('/content/drive/MyDrive/Robot perception /Modeling/models/lstm_data_trim.h5')
-model_load = load_model('./models/sep_1/lstm.h5',compile = False)
-model_load.compile(loss='categorical_crossentropy', metrics = ['accuracy'], optimizer=Adam(1e-2))
+# model_load = load_model('./models/sep_1/lstm.h5')
 # model_load = load_model('./models/rnn.h5')
 # model_load.evaluate(x_test,y_test)
-print(model_load.summary())
+# print(model_load.summary())
+with open('./models/sep_0.7/data_driven', 'rb') as handle:
+    dic = pickle.load(handle)
+
+
+
+def model_dtw_pred(ip_data,dic):
+
+    
+    predi = []
+    d = []
+    for i in range(0,9):
+        distance, path = fastdtw(dic[i].T, ip_data, dist=euclidean)
+        d.append(distance)
+
+    predi.append(d.index(min(d)))
+    
+    return predi
+
 data_ =[]
 
 interrupted = False
@@ -58,13 +81,10 @@ def thread_1():
                 continue
             else:
                 old = data_[-1]
-                ip_data = tf.expand_dims(tf.transpose(tf.convert_to_tensor(tf.keras.preprocessing.sequence.pad_sequences(np.array(data_).T, padding='post', dtype='float', maxlen=200))),axis =0)
-                prediction = model_load.predict(ip_data,verbose = 0)
-                conf = prediction[0][len(data_)-1][np.argmax(prediction,axis=2)[0][-1]]
-                pred = np.argmax(prediction,axis=2)[0][-1]
-                if conf >= 0.85:
-                    print(pred)
+                if len(data_) > 2:
+                    pred = predi = model_dtw_pred(data_,dic)[0]
                     sock.SendData(str(pred))
+                    print(pred)
         if interrupted:
             break
 
