@@ -1,5 +1,6 @@
 # VR based benchmarking of Fast Target Prediction Algorithms
-This respository contains the data and target prediction models used for the final project. 
+
+This respository contains the data and target prediction models used for the final project of the robot perception course at NYU. 
 
 The repository also contains the VR environment developed on unity and interfaced with the occulus rift 2 headset mounted with the leap motion camera.
 
