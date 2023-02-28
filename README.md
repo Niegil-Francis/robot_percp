@@ -1,7 +1,7 @@
 # VR based benchmarking of Fast Target Prediction Algorithms
 
 
-Abstract -  In recent years, the speed and accuracy of egocentric hand target prediction has proven to be vital in many areas
+Abstract - In recent years, the speed and accuracy of egocentric hand target prediction has proven to be vital in many areas
 such as human-robot collaboration, assistive technology, and the
 gaming industry. It is therefore crucial to benchmark target
 prediction algorithms in terms of these metrics. We therefore
@@ -18,9 +18,7 @@ due to its consistency and replicability. Apart from this, it
 provides a more intuitive and interactive form of data collection.
 The methodology is implemented on various target prediction
 algorithms and is tested in real-time using data collected from
-four users. Datasets are also created for offline training. Both
-the dataset and the VR game can be found on github. (Results
-to be added
+four users. Datasets are also created for offline training.
 
 This respository contains the data and target prediction models used for the final project of the robot perception course at NYU. 
 
