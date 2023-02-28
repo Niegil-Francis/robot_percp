@@ -1,7 +1,7 @@
 # VR based benchmarking of Fast Target Prediction Algorithms
+![](VR-benchmarking.gif)
 
-
-Abstract - In recent years, the speed and accuracy of egocentric hand target prediction has proven to be vital in many areas
+Abstract - In recent years, the speed and accuracy of egocentric hand target prediction has proven to be vital in many areas
 such as human-robot collaboration, assistive technology, and the
 gaming industry. It is therefore crucial to benchmark target
 prediction algorithms in terms of these metrics. We therefore
